@@ -36,8 +36,8 @@ class Experiment:
         np.random.seed(seed)
         
         # Create output directories
-        model_artifacts_dir = os.path.join(output_dir, "model_artifacts") 
-        general_artifacts_dir = os.path.join(output_dir, "general_artifacts")
+        model_artifacts_dir = os.path.join(output_dir, "output", "model_artifacts") 
+        general_artifacts_dir = os.path.join(output_dir, "output", "general_artifacts")
         os.makedirs(model_artifacts_dir, exist_ok=True)
         os.makedirs(general_artifacts_dir, exist_ok=True)
         
@@ -88,7 +88,7 @@ class Experiment:
             # Evaluate model
             print("Evaluating model on test set...")
             evaluator = ModelEvaluator(self._config.model_evaluation)
-            evaluation_metrics = evaluator.evaluate_model(model_wrapper, X_test_features, y_test, output_dir)
+            evaluation_metrics = evaluator.evaluate_model(model_wrapper, X_test_features, y_test, os.path.join(output_dir, "output"))
             
             print(f"Primary metric (Macro PR-AUC): {evaluation_metrics['macro_pr_auc']:.4f}")
             
@@ -132,7 +132,7 @@ class Experiment:
             )
             
             # If an MLflow run ID is provided, reconnect and log the model as an artifact
-            active_run_id = "21c547a3e7e84f14a72e85951ef1cb03"
+            active_run_id = "e90f0c32bd13465ba2dfcc840831071f"
             logged_model_uri = None
             if active_run_id and active_run_id != 'None' and active_run_id.strip():
                 print(f"✅ Active MLflow run ID '{active_run_id}' detected. Reconnecting to log model as an artifact.")

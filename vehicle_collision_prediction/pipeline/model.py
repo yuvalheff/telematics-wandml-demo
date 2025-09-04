@@ -96,6 +96,14 @@ class ModelWrapper:
                     index=X_features.index
                 )
         
+        # Handle class imbalance for XGBoost
+        fit_params = {}
+        if self.config.model_type == "XGBClassifier":
+            # Compute sample weights for class balancing
+            from sklearn.utils.class_weight import compute_sample_weight
+            sample_weights = compute_sample_weight('balanced', y)
+            fit_params['sample_weight'] = sample_weights
+
         # Hyperparameter tuning if enabled
         if self.config.hyperparameter_tuning.get('enabled', False):
             param_grid = self.config.hyperparameter_tuning.get('param_grid', {})
@@ -109,14 +117,23 @@ class ModelWrapper:
                     scoring=pr_auc_macro_scorer,
                     n_jobs=-1
                 )
-                grid_search.fit(X_features, y)
+                if fit_params:
+                    grid_search.fit(X_features, y, **fit_params)
+                else:
+                    grid_search.fit(X_features, y)
                 self.model = grid_search.best_estimator_
             else:
                 self.model = base_model
-                self.model.fit(X_features, y)
+                if fit_params:
+                    self.model.fit(X_features, y, **fit_params)
+                else:
+                    self.model.fit(X_features, y)
         else:
             self.model = base_model
-            self.model.fit(X_features, y)
+            if fit_params:
+                self.model.fit(X_features, y, **fit_params)
+            else:
+                self.model.fit(X_features, y)
         
         self.fitted = True
         return self
@@ -144,7 +161,15 @@ class ModelWrapper:
                 index=X_features.index
             )
         
-        return self.model.predict(X_features)
+        # For XGBoost with multi:softprob, need to convert probabilities to class labels
+        if self.config.model_type == "XGBClassifier":
+            probabilities = self.model.predict(X_features)
+            if len(probabilities.shape) == 2 and probabilities.shape[1] > 1:
+                return np.argmax(probabilities, axis=1)
+            else:
+                return self.model.predict(X_features)
+        else:
+            return self.model.predict(X_features)
 
     def predict_proba(self, X: pd.DataFrame) -> np.ndarray:
         """

@@ -1,0 +1,59 @@
+{
+  "experiment_name": "RF_Baseline_Collision_Prediction",
+  "experiment_id": "experiment_1",
+  "execution_date": "2025-09-04T18:15:32.614626Z",
+  "primary_metric": {
+    "name": "macro_pr_auc",
+    "value": 0.383,
+    "description": "Macro-averaged Precision-Recall Area Under Curve"
+  },
+  "model_type": "Random Forest",
+  "task_type": "Multi-class collision prediction",
+  "target_variable": "collisions",
+  "key_findings": [
+    "Baseline model achieved 0.383 macro PR-AUC for collision prediction",
+    "Comprehensive feature engineering with risk behavior ratios implemented",
+    "Class imbalance remains a significant challenge despite balanced weights",
+    "Model provides interpretable feature importance for business insights",
+    "Performance insufficient for high-stakes collision prevention deployment"
+  ],
+  "strengths": [
+    "Robust evaluation framework with cross-validation",
+    "Extensive feature engineering and preprocessing pipeline",
+    "Proper handling of class imbalance with balanced weights",
+    "Clear model interpretability through Random Forest"
+  ],
+  "weaknesses": [
+    "Moderate performance with high false positive risk",
+    "Limited algorithm exploration beyond Random Forest",
+    "Severe class imbalance not fully resolved",
+    "Potential missing critical behavioral features"
+  ],
+  "future_recommendations": [
+    "Experiment with advanced algorithms (XGBoost, LightGBM)",
+    "Enhance feature space with external data sources",
+    "Implement cost-sensitive learning and threshold optimization",
+    "Explore advanced sampling techniques (SMOTE, ADASYN)"
+  ],
+  "technical_issues": [
+    "MLflow model serialization and path resolution issues",
+    "JSON serialization errors with complex data types"
+  ],
+  "artifacts_generated": [
+    "trained_models.pkl",
+    "data_processor.pkl", 
+    "feature_processor.pkl",
+    "mlflow_model/",
+    "confusion_matrix.html",
+    "precision_recall_curves.html",
+    "feature_importance.html",
+    "calibration_plot.html",
+    "class_distribution.html",
+    "probability_distributions.html"
+  ],
+  "business_impact": {
+    "readiness": "Baseline established, not ready for production",
+    "risk_assessment": "High false positive rates pose operational challenges",
+    "deployment_considerations": "Requires significant performance improvement for safety-critical use"
+  }
+}

@@ -1,56 +1,55 @@
 data_prep:
   dataset_name: "vehicle_collision_prediction"
-  version: "1.0"
+  version: "2.0"
   # Features to remove
   remove_columns: ["driver_id"]
   # Categorical encoding configuration
   categorical_columns: ["month"]
-  # Missing value imputation configuration 
-  imputation_columns: ["count_trip", "miles", "drive_hours", "count_brakes", "count_accelarations", "time_speeding_hours", "time_phoneuse_hours", "highway_miles", "night_drive_hrs", "maximum_speed"]
-  # Log transformation configuration
-  log_transform_columns: ["miles", "drive_hours", "count_brakes", "count_accelarations", "time_speeding_hours", "time_phoneuse_hours", "highway_miles", "night_drive_hrs"]
-  # Scaling configuration
-  scaling_columns: ["month", "count_trip", "miles", "drive_hours", "count_brakes", "count_accelarations", "time_speeding_hours", "time_phoneuse_hours", "highway_miles", "night_drive_hrs", "maximum_speed"]
+  # Missing value imputation configuration - median for numerical, mode for categorical
+  imputation_columns: ["time_phoneuse_hours", "count_trip", "miles", "drive_hours", "count_brakes", "count_accelarations", "time_speeding_hours", "highway_miles", "night_drive_hrs", "maximum_speed"]
+  # Log transformation configuration - apply log1p to handle right skew
+  log_transform_columns: ["miles", "drive_hours", "count_brakes", "count_accelarations"]
+  # Scaling configuration - XGBoost handles different scales naturally, minimal scaling needed
+  scaling_columns: []
   
 feature_prep:
-  # Feature engineering configuration
+  # Enhanced feature engineering configuration
   create_exposure_normalized: True
   create_risk_ratios: True
   create_composite_risk_score: True
-  # Final feature set includes both original and engineered features
+  # Keep original features alongside engineered ones for maximum information
   keep_original_features: True
 
 model_evaluation:
   split_ratio: 0.2
-  primary_metric: "PR-AUC"
+  primary_metric: "Macro PR-AUC"
   cv_folds: 5
   scoring_method: "macro"
   secondary_metrics: ["f1_score", "precision", "recall", "classification_report"]
 
 model:
-  model_type: "RandomForestClassifier"
+  model_type: "XGBClassifier"
   model_params:
     n_estimators: 200
-    max_depth: 12
-    min_samples_split: 10
-    min_samples_leaf: 5
-    class_weight: "balanced"
+    max_depth: 6
+    learning_rate: 0.1
+    subsample: 0.8
+    colsample_bytree: 0.8
+    objective: "multi:softprob"
+    eval_metric: "mlogloss"
+    num_class: 3
     random_state: 42
-  # Hyperparameter tuning configuration
+  # Hyperparameter tuning configuration - disabled for focused implementation
   hyperparameter_tuning:
-    enabled: True
-    param_grid:
-      n_estimators: [100, 200, 300]
-      max_depth: [8, 10, 12, 15]
-      min_samples_split: [5, 10, 20]
-      min_samples_leaf: [2, 5, 10]
+    enabled: false
+    param_grid: {}
   # Secondary models for comparison
   comparison_models:
-    - "XGBClassifier"
+    - "RandomForestClassifier"
     - "GradientBoostingClassifier"
-  # Feature selection configuration
+  # Feature selection configuration - disabled to use all enhanced features
   feature_selection:
-    enabled: True
+    enabled: false
     method: "RFECV"
     min_features: 5
 

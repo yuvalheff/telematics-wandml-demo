@@ -1,0 +1,137 @@
+{
+  "experiment_name": "XGBoost_Enhanced_Collision_Prediction",
+  "iteration": 2,
+  "task_type": "Multi-class classification (imbalanced)",
+  "target_column": "collisions",
+  "dataset_paths": {
+    "train": "/Users/yuvalheffetz/ds-agent-projects/session_6a348ddd-12b5-4ee2-af3a-daf992d9a288/data/train_set.csv",
+    "test": "/Users/yuvalheffetz/ds-agent-projects/session_6a348ddd-12b5-4ee2-af3a-daf992d9a288/data/test_set.csv"
+  },
+  "primary_change": "Switch from Random Forest to XGBoost with enhanced feature engineering",
+  "expected_improvement": "0.032 increase in Macro PR-AUC (from 0.383 to 0.415)",
+  
+  "preprocessing_steps": {
+    "missing_values": {
+      "method": "Median imputation for numerical features, mode imputation for categorical features",
+      "specific_columns": {
+        "time_phoneuse_hours": "13.4% missing - use median imputation",
+        "other_numerical": "0.7% missing in count_trip, miles, drive_hours, count_brakes, count_accelarations, time_speeding_hours, highway_miles, night_drive_hrs, maximum_speed - use median imputation"
+      }
+    },
+    "categorical_encoding": {
+      "method": "Label encoding for month column",
+      "columns": ["month"]
+    },
+    "feature_scaling": {
+      "method": "Not required for XGBoost",
+      "note": "XGBoost handles different feature scales naturally"
+    }
+  },
+  
+  "feature_engineering_steps": {
+    "risk_behavior_ratios": {
+      "brakes_per_trip": "count_brakes / max(count_trip, 1) - normalized braking intensity",
+      "accel_per_trip": "count_accelarations / max(count_trip, 1) - normalized acceleration intensity", 
+      "speeding_ratio": "time_speeding_hours / max(drive_hours, 0.1) - proportion of time speeding",
+      "phone_ratio": "time_phoneuse_hours / max(drive_hours, 0.1) - proportion of time on phone"
+    },
+    "exposure_normalization": {
+      "highway_ratio": "highway_miles / max(miles, 1) - proportion of highway driving",
+      "night_ratio": "night_drive_hrs / max(drive_hours, 0.1) - proportion of night driving"
+    },
+    "composite_metrics": {
+      "risk_score": "(brakes_per_trip + accel_per_trip + speeding_ratio + phone_ratio) / 4 - overall risk composite",
+      "miles_per_hour": "miles / max(drive_hours, 0.1) - average driving speed"
+    },
+    "trip_efficiency": {
+      "trip_distance_avg": "miles / max(count_trip, 1) - average distance per trip",
+      "trip_duration_avg": "drive_hours / max(count_trip, 1) - average duration per trip"
+    },
+    "log_transformations": {
+      "miles_log": "log1p(miles) - handle right skew",
+      "drive_hours_log": "log1p(drive_hours) - handle right skew", 
+      "count_brakes_log": "log1p(count_brakes) - handle right skew",
+      "count_accelarations_log": "log1p(count_accelarations) - handle right skew"
+    }
+  },
+  
+  "model_selection": {
+    "algorithm": "XGBoost Classifier",
+    "hyperparameters": {
+      "n_estimators": 200,
+      "max_depth": 6,
+      "learning_rate": 0.1,
+      "subsample": 0.8,
+      "colsample_bytree": 0.8,
+      "random_state": 42,
+      "objective": "multi:softprob",
+      "eval_metric": "mlogloss",
+      "verbosity": 0
+    },
+    "class_imbalance_handling": {
+      "method": "Class weight calculation",
+      "approach": "Use sklearn.utils.class_weight.compute_class_weight with 'balanced' strategy",
+      "rationale": "More effective than SMOTE for extremely imbalanced dataset with only 13 samples in minority class"
+    },
+    "cross_validation": {
+      "method": "StratifiedKFold",
+      "folds": 5,
+      "shuffle": true,
+      "random_state": 42
+    }
+  },
+  
+  "evaluation_strategy": {
+    "primary_metric": "Macro PR-AUC",
+    "secondary_metrics": [
+      "Individual class PR-AUC for classes 0, 1, 2",
+      "Weighted F1-Score", 
+      "Macro F1-Score",
+      "Balanced Accuracy",
+      "Classification Report"
+    ],
+    "diagnostic_analyses": {
+      "feature_importance": "Extract and visualize XGBoost feature importances to understand model decisions",
+      "precision_recall_curves": "Plot PR curves for each class to assess discrimination ability",
+      "confusion_matrix": "Analyze prediction patterns across collision classes",
+      "calibration_plot": "Assess probability calibration for each class",
+      "class_distribution_analysis": "Compare predicted vs actual class distributions",
+      "error_analysis": "Analyze misclassified cases to identify patterns",
+      "cross_validation_stability": "Assess performance consistency across CV folds"
+    },
+    "model_interpretation": {
+      "feature_importance_plot": "Bar chart of top 20 most important features",
+      "shap_analysis": "SHAP values for understanding individual predictions (optional)",
+      "business_insights": "Translate feature importance to actionable safety insights"
+    }
+  },
+  
+  "expected_outputs": {
+    "model_artifact": "Trained XGBoost model saved with MLflow",
+    "performance_report": "Comprehensive markdown report with all metrics and analysis",
+    "visualizations": [
+      "precision_recall_curves.html",
+      "confusion_matrix.html", 
+      "feature_importance.html",
+      "calibration_plot.html",
+      "class_distribution.html",
+      "cross_validation_scores.html"
+    ],
+    "experiment_summary": "JSON file with key metrics and findings for comparison tracking"
+  },
+  
+  "success_criteria": {
+    "minimum_improvement": "Achieve > 0.400 Macro PR-AUC (improvement over 0.383 baseline)",
+    "target_improvement": "Achieve ~0.415 Macro PR-AUC based on exploration experiments",
+    "consistency": "CV standard deviation < 0.020 for stable performance",
+    "interpretability": "Clear feature importance rankings for business insights"
+  },
+  
+  "specific_implementation_notes": {
+    "feature_order": "Apply feature engineering after preprocessing but before model training",
+    "validation_strategy": "Use same 5-fold stratified CV as baseline for direct comparison",
+    "missing_value_handling": "Ensure consistent imputation between train and test sets",
+    "class_weight_computation": "Calculate class weights from training data only, apply to model",
+    "feature_selection": "Retain all engineered features - XGBoost handles high dimensionality well"
+  }
+}
