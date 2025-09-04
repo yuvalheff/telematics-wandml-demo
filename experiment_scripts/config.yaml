@@ -1,0 +1,20 @@
+data_prep:
+  dataset: "name"
+  version: "version"
+  dataset_name: "dataset_name"
+  placeholder: "placeholder"
+  
+feature_prep:
+  placeholder: "placeholder"
+
+model_evaluation:
+    split_ratio: 0.2
+    placeholder: "placeholder"
+
+model:
+    model_type: "model_type"
+    model_params: Dict[str, Any]
+    placeholder: "placeholder"
+
+
+
