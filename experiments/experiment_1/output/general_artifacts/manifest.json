@@ -1,0 +1,37 @@
+{
+  "experiment_output": {
+    "metric_name": "macro_pr_auc",
+    "metric_value": 0.38289962712412523,
+    "model_artifacts": [
+      "data_processor.pkl",
+      "feature_processor.pkl",
+      "trained_models.pkl",
+      "mlflow_model/"
+    ],
+    "mlflow_model_info": {
+      "model_path": "output/model_artifacts/mlflow_model/",
+      "logged_model_uri": "models:/m-8fd665a2d561473a9c293c6aa940b442",
+      "model_type": "sklearn",
+      "task_type": "classification",
+      "signature": {
+        "inputs": {
+          "driver_id": "object",
+          "month": "object",
+          "count_trip": "float64"
+        },
+        "outputs": {
+          "predictions": "int64"
+        }
+      },
+      "framework_version": "1.7.1",
+      "input_example": {
+        "driver_id": "PWS-274",
+        "month": "Aug-22",
+        "count_trip": 1.0
+      }
+    }
+  },
+  "seed": 42,
+  "execution_time": "2025-09-04T18:15:32.614610Z",
+  "harness_execution_proof": "Experiment completed at 2025-09-04T18:15:32.614626Z"
+}

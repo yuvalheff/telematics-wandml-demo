@@ -1,20 +1,58 @@
 data_prep:
-  dataset: "name"
-  version: "version"
-  dataset_name: "dataset_name"
-  placeholder: "placeholder"
+  dataset_name: "vehicle_collision_prediction"
+  version: "1.0"
+  # Features to remove
+  remove_columns: ["driver_id"]
+  # Categorical encoding configuration
+  categorical_columns: ["month"]
+  # Missing value imputation configuration 
+  imputation_columns: ["count_trip", "miles", "drive_hours", "count_brakes", "count_accelarations", "time_speeding_hours", "time_phoneuse_hours", "highway_miles", "night_drive_hrs", "maximum_speed"]
+  # Log transformation configuration
+  log_transform_columns: ["miles", "drive_hours", "count_brakes", "count_accelarations", "time_speeding_hours", "time_phoneuse_hours", "highway_miles", "night_drive_hrs"]
+  # Scaling configuration
+  scaling_columns: ["month", "count_trip", "miles", "drive_hours", "count_brakes", "count_accelarations", "time_speeding_hours", "time_phoneuse_hours", "highway_miles", "night_drive_hrs", "maximum_speed"]
   
 feature_prep:
-  placeholder: "placeholder"
+  # Feature engineering configuration
+  create_exposure_normalized: True
+  create_risk_ratios: True
+  create_composite_risk_score: True
+  # Final feature set includes both original and engineered features
+  keep_original_features: True
 
 model_evaluation:
-    split_ratio: 0.2
-    placeholder: "placeholder"
+  split_ratio: 0.2
+  primary_metric: "PR-AUC"
+  cv_folds: 5
+  scoring_method: "macro"
+  secondary_metrics: ["f1_score", "precision", "recall", "classification_report"]
 
 model:
-    model_type: "model_type"
-    model_params: Dict[str, Any]
-    placeholder: "placeholder"
+  model_type: "RandomForestClassifier"
+  model_params:
+    n_estimators: 200
+    max_depth: 12
+    min_samples_split: 10
+    min_samples_leaf: 5
+    class_weight: "balanced"
+    random_state: 42
+  # Hyperparameter tuning configuration
+  hyperparameter_tuning:
+    enabled: True
+    param_grid:
+      n_estimators: [100, 200, 300]
+      max_depth: [8, 10, 12, 15]
+      min_samples_split: [5, 10, 20]
+      min_samples_leaf: [2, 5, 10]
+  # Secondary models for comparison
+  comparison_models:
+    - "XGBClassifier"
+    - "GradientBoostingClassifier"
+  # Feature selection configuration
+  feature_selection:
+    enabled: True
+    method: "RFECV"
+    min_features: 5
 
 
 

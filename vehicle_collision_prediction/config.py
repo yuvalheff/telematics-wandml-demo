@@ -9,27 +9,39 @@ class ConfigParsingFailed(Exception):
 
 @dataclass
 class DataConfig:
-    version: str
     dataset_name: str
-    placeholder: Any
+    version: str
+    remove_columns: List[str]
+    categorical_columns: List[str]
+    imputation_columns: List[str]
+    log_transform_columns: List[str]
+    scaling_columns: List[str]
 
 
 @dataclass
 class FeaturesConfig:
-    placeholder: Any
+    create_exposure_normalized: bool
+    create_risk_ratios: bool
+    create_composite_risk_score: bool
+    keep_original_features: bool
 
 
 @dataclass
 class ModelEvalConfig:
     split_ratio: float
-    placeholder: Any
+    primary_metric: str
+    cv_folds: int
+    scoring_method: str
+    secondary_metrics: List[str]
 
 
 @dataclass
 class ModelConfig:
     model_type: str
     model_params: Dict[str, Any]
-    placeholder: Any
+    hyperparameter_tuning: Dict[str, Any]
+    comparison_models: List[str]
+    feature_selection: Dict[str, Any]
 
 
 @dataclass
